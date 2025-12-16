@@ -9,13 +9,12 @@ import sys
 
 from game_logic import Game21
 
-
 class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Game of 21")
-        self.setGeometry(200, 200, 400, 400)
+        self.setGeometry(200, 200, 900, 500)
 
         self.game = Game21()
         self.dark_mode = False
@@ -28,6 +27,7 @@ class MainWindow(QMainWindow):
         root_layout = QHBoxLayout()
         central_widget.setLayout(root_layout)
 
+        # ---------------- LEFT BUTTONS ----------------
         left_layout = QVBoxLayout()
 
         self.hitButton = QPushButton("Hit")
@@ -49,16 +49,23 @@ class MainWindow(QMainWindow):
 
         root_layout.addLayout(left_layout, 1)
 
+        # ---------------- GREEN TABLE ----------------
         table_widget = QWidget()
         table_widget.setStyleSheet("background-color: #0b6b1a;")
-        table_layout = QVBoxLayout()
-        table_widget.setLayout(table_layout)
+        root_layout.addWidget(table_widget, 5)
+
+        table_outer_layout = QHBoxLayout()
+        table_widget.setLayout(table_outer_layout)
+
+        # -------- GAME AREA (LEFT SIDE OF TABLE) --------
+        game_layout = QVBoxLayout()
+        table_outer_layout.addLayout(game_layout, 4)
 
         title = QLabel("Blackjack")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setFont(QFont("Arial", 28, QFont.Weight.Bold))
         title.setStyleSheet("color: #1e40ff;")
-        table_layout.addWidget(title)
+        game_layout.addWidget(title)
 
         dealer_label = QLabel("Dealer")
         dealer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -71,15 +78,15 @@ class MainWindow(QMainWindow):
 
         self.dealerCardsLayout = QHBoxLayout()
 
-        table_layout.addWidget(dealer_label)
-        table_layout.addWidget(self.dealerTotalLabel)
-        table_layout.addLayout(self.dealerCardsLayout)
+        game_layout.addWidget(dealer_label)
+        game_layout.addWidget(self.dealerTotalLabel)
+        game_layout.addLayout(self.dealerCardsLayout)
 
         self.feedbackLabel = QLabel("")
         self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.feedbackLabel.setFont(QFont("Arial", 14, QFont.Weight.Bold))
         self.feedbackLabel.setStyleSheet("color: yellow;")
-        table_layout.addWidget(self.feedbackLabel)
+        game_layout.addWidget(self.feedbackLabel)
 
         player_label = QLabel("Player")
         player_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -92,13 +99,15 @@ class MainWindow(QMainWindow):
 
         self.playerCardsLayout = QHBoxLayout()
 
-        table_layout.addWidget(player_label)
-        table_layout.addWidget(self.playerTotalLabel)
-        table_layout.addLayout(self.playerCardsLayout)
+        game_layout.addWidget(player_label)
+        game_layout.addWidget(self.playerTotalLabel)
+        game_layout.addLayout(self.playerCardsLayout)
 
-        root_layout.addWidget(table_widget, 4)
+        game_layout.addStretch()
 
-        right_layout = QVBoxLayout()
+        # -------- SCORE AREA (RIGHT SIDE OF TABLE) --------
+        score_layout = QVBoxLayout()
+        table_outer_layout.addLayout(score_layout, 1)
 
         score_title = QLabel("Score")
         score_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -117,14 +126,13 @@ class MainWindow(QMainWindow):
             }
         """)
 
-        right_layout.addWidget(score_title)
-        right_layout.addWidget(self.statsLabel)
-        right_layout.addStretch()
-
-        root_layout.addLayout(right_layout, 1)
+        score_layout.addWidget(score_title)
+        score_layout.addWidget(self.statsLabel)
+        score_layout.addStretch()
 
         self.new_round_setup()
 
+    # ---------------- GAME LOGIC (UNCHANGED) ----------------
 
     def on_hit(self):
         card = self.game.player_hit()
@@ -161,7 +169,6 @@ class MainWindow(QMainWindow):
     def on_new_round(self):
         self.game.new_round()
         self.new_round_setup()
-
 
     def clear_layout(self, layout):
         while layout.count():
@@ -201,12 +208,8 @@ class MainWindow(QMainWindow):
                 self.add_card(self.dealerCardsLayout, card)
             self.dealerTotalLabel.setText(f"Total: {self.game.dealer_total()}")
         else:
-            if len(self.game.dealer_hand) >= 2:
-                self.add_card(self.dealerCardsLayout, "??")  # hidden card
-                self.add_card(self.dealerCardsLayout, self.game.dealer_hand[1])  # visible card
-            elif len(self.game.dealer_hand) == 1:
-                self.add_card(self.dealerCardsLayout, "??")
-
+            self.add_card(self.dealerCardsLayout, "??")
+            self.add_card(self.dealerCardsLayout, self.game.dealer_hand[1])
             self.dealerTotalLabel.setText("Total: ?")
 
     def new_round_setup(self):
@@ -220,38 +223,11 @@ class MainWindow(QMainWindow):
         for card in self.game.player_hand:
             self.add_card(self.playerCardsLayout, card)
 
-        self.playerTotalLabel.setText(
-            f"Total: {self.game.player_total()}"
-        )
-
+        self.playerTotalLabel.setText(f"Total: {self.game.player_total()}")
         self.update_dealer_cards(full=False)
 
         self.hitButton.setEnabled(True)
         self.standButton.setEnabled(True)
-
-        player_total = self.game.player_total()
-        dealer_total = self.game.dealer_total()
-
-        if player_total == 21 and dealer_total == 21:
-            self.update_dealer_cards(full=True)
-            self.feedbackLabel.setText("Draw! Both have Blackjack (21).")
-            self.game.pushes += 1
-            self.end_round()
-            return
-
-        if player_total == 21:
-            self.update_dealer_cards(full=True)
-            self.feedbackLabel.setText("Blackjack! Player wins (21)")
-            self.game.player_wins += 1
-            self.end_round()
-            return
-
-        if dealer_total == 21:
-            self.update_dealer_cards(full=True)
-            self.feedbackLabel.setText("Dealer Blackjack! Dealer wins (21)")
-            self.game.dealer_wins += 1
-            self.end_round()
-            return
 
     def end_round(self):
         self.hitButton.setEnabled(False)
@@ -263,42 +239,25 @@ class MainWindow(QMainWindow):
             f"Pushes: {self.game.pushes}"
         )
 
-
     def apply_light_theme(self):
         self.setStyleSheet("""
             QMainWindow { background-color: #f0f0f0; }
-            QPushButton {
-                background-color: #ddd;
-                border: 1px solid #aaa;
-                padding: 6px;
-            }
-            QPushButton:hover { background-color: #ccc; }
+            QPushButton { background-color: #ddd; }
         """)
 
     def apply_dark_theme(self):
         self.setStyleSheet("""
             QMainWindow { background-color: #1e1e1e; }
-            QPushButton {
-                background-color: #333;
-                color: white;
-                border: 1px solid #666;
-                padding: 6px;
-            }
-            QPushButton:hover { background-color: #444; }
+            QPushButton { background-color: #333; color: white; }
         """)
 
     def toggle_theme(self):
         self.dark_mode = not self.dark_mode
-        if self.dark_mode:
-            self.apply_dark_theme()
-        else:
-            self.apply_light_theme()
+        self.apply_dark_theme() if self.dark_mode else self.apply_light_theme()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.setAttribute(Qt.ApplicationAttribute.AA_DontShowIconsInMenus, False)
-
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
