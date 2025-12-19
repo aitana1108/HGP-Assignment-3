@@ -22,6 +22,7 @@ class Game21: #handles all the game logic
 
         self.dealer_hidden_revealed = False
 
+     #deals the starting cards to dealer and player
     def deal_initial_cards(self):
         self.player_hand = [self.draw_card(), self.draw_card()]
         self.dealer_hand = [self.draw_card(), self.draw_card()]
@@ -49,14 +50,14 @@ class Game21: #handles all the game logic
         except ValueError:
             return 0
 
-    def hand_total(self, hand):
+    def hand_total(self, hand): #calculates the total value of cards in hands
         total = 0
         ace_count = 0
 
         for card in hand:
             value = self.card_value(card)
             total += value
-            if card.strip().split("_")[0].upper() == "A":
+            if card.strip().split("_")[0].upper() == "A": #checks if the card is an ace
                 ace_count += 1
 
         while total > 21 and ace_count > 0:
@@ -66,17 +67,17 @@ class Game21: #handles all the game logic
         return total
 
 
-    def player_hit(self):
+    def player_hit(self): # draws new card to player
 
         card = self.draw_card()
         self.player_hand.append(card)
         return card
 
-    def player_total(self):
+    def player_total(self): #returns the current total value of cards in players hand
         return self.hand_total(self.player_hand)
 
 
-    def reveal_dealer_card(self):
+    def reveal_dealer_card(self):#shows the dealer hidden card
 
         self.dealer_hidden_revealed = True
 
@@ -88,8 +89,8 @@ class Game21: #handles all the game logic
         while self.dealer_total() < 17:
             self.dealer_hand.append(self.draw_card())
 
-
-    def decide_winner(self):
+                             # updates win,loss and results
+    def decide_winner(self):#determines the winner of the round based on the total cards on play
         player_total = self.player_total()
         dealer_total = self.dealer_total()
 

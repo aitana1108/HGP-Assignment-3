@@ -8,10 +8,11 @@ from PyQt6.QtGui import QFont, QPixmap
 import sys
 
 from game_logic import Game21
+#handles all ui elements,user interaction and display updates
 
 class MainWindow(QMainWindow):
 
-    def __init__(self):
+    def __init__(self): #initalizes the main and ui layout
         super().__init__()
         self.setWindowTitle("Game of 21")
         self.setGeometry(200, 200, 900, 500)
@@ -20,16 +21,16 @@ class MainWindow(QMainWindow):
         self.dark_mode = False
         self.initUI()
 
-    def initUI(self):
+    def initUI(self): #creates all ui widgets and layouts for blackjack
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
         root_layout = QHBoxLayout()
         central_widget.setLayout(root_layout)
 
-        # ---------------- LEFT BUTTONS ----------------
         left_layout = QVBoxLayout()
 
+        #left panel buttons
         self.hitButton = QPushButton("Hit")
         self.standButton = QPushButton("Stand")
         self.newRoundButton = QPushButton("New Round")
@@ -42,6 +43,7 @@ class MainWindow(QMainWindow):
         left_layout.addStretch()
         left_layout.addWidget(self.themeButton)
 
+        #connects the buttons with the actions
         self.hitButton.clicked.connect(self.on_hit)
         self.standButton.clicked.connect(self.on_stand)
         self.newRoundButton.clicked.connect(self.on_new_round)
@@ -49,7 +51,6 @@ class MainWindow(QMainWindow):
 
         root_layout.addLayout(left_layout, 1)
 
-        # ---------------- GREEN TABLE ----------------
         table_widget = QWidget()
         table_widget.setStyleSheet("background-color: #0b6b1a;")
         root_layout.addWidget(table_widget, 5)
@@ -57,7 +58,6 @@ class MainWindow(QMainWindow):
         table_outer_layout = QHBoxLayout()
         table_widget.setLayout(table_outer_layout)
 
-        # -------- GAME AREA (LEFT SIDE OF TABLE) --------
         game_layout = QVBoxLayout()
         table_outer_layout.addLayout(game_layout, 4)
 
@@ -76,7 +76,7 @@ class MainWindow(QMainWindow):
         self.dealerTotalLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.dealerTotalLabel.setStyleSheet("color: white;")
 
-        self.dealerCardsLayout = QHBoxLayout()
+        self.dealerCardsLayout = QHBoxLayout() #dealer section Ui
 
         game_layout.addWidget(dealer_label)
         game_layout.addWidget(self.dealerTotalLabel)
@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
         self.playerTotalLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.playerTotalLabel.setStyleSheet("color: white;")
 
-        self.playerCardsLayout = QHBoxLayout()
+        self.playerCardsLayout = QHBoxLayout() #player section ui
 
         game_layout.addWidget(player_label)
         game_layout.addWidget(self.playerTotalLabel)
@@ -105,7 +105,6 @@ class MainWindow(QMainWindow):
 
         game_layout.addStretch()
 
-        # -------- SCORE AREA (RIGHT SIDE OF TABLE) --------
         score_layout = QVBoxLayout()
         table_outer_layout.addLayout(score_layout, 1)
 
@@ -114,7 +113,7 @@ class MainWindow(QMainWindow):
         score_title.setFont(QFont("Arial", 14, QFont.Weight.Bold))
         score_title.setStyleSheet("color: gold;")
 
-        self.statsLabel = QLabel("Wins: 0\nLosses: 0\nPushes: 0")
+        self.statsLabel = QLabel("Wins: 0\nLosses: 0\nPushes: 0") #scoreboard section
         self.statsLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.statsLabel.setFont(QFont("Arial", 12))
         self.statsLabel.setStyleSheet("""
@@ -132,11 +131,11 @@ class MainWindow(QMainWindow):
 
         self.new_round_setup()
 
-    # ---------------- GAME LOGIC (UNCHANGED) ----------------
 
-    def on_hit(self):
+    def on_hit(self): #handles the hit button and its action
         card = self.game.player_hit()
         self.add_card(self.playerCardsLayout, card)
+        #gives card to player
 
         total = self.game.player_total()
         self.playerTotalLabel.setText(f"Total: {total}")
@@ -154,9 +153,10 @@ class MainWindow(QMainWindow):
             self.game.dealer_wins += 1
             self.end_round()
 
-    def on_stand(self):
+    def on_stand(self): #handles the stand button and its action
         self.game.reveal_dealer_card()
         self.game.play_dealer_turn()
+          #reveals the dealer cards , player turns and decides the winner
 
         self.update_dealer_cards(full=True)
         self.dealerTotalLabel.setText(f"Total: {self.game.dealer_total()}")
@@ -166,11 +166,11 @@ class MainWindow(QMainWindow):
 
         self.end_round()
 
-    def on_new_round(self):
+    def on_new_round(self): #starts a new round
         self.game.new_round()
         self.new_round_setup()
 
-    def clear_layout(self, layout):
+    def clear_layout(self, layout): #reset cards between rounds
         while layout.count():
             item = layout.takeAt(0)
             widget = item.widget()
@@ -183,7 +183,7 @@ class MainWindow(QMainWindow):
         rank_name = rank_map.get(rank, rank)
         return f"assets/cards/{rank_name}_of_{suit}.png"
 
-    def add_card(self, layout, card_text):
+    def add_card(self, layout, card_text): #shows the back of card if it is hidden
         label = QLabel()
 
         if card_text == "??":
@@ -200,7 +200,7 @@ class MainWindow(QMainWindow):
         label.setPixmap(pixmap)
         layout.addWidget(label)
 
-    def update_dealer_cards(self, full=False):
+    def update_dealer_cards(self, full=False): #updates the dealer  cards
         self.clear_layout(self.dealerCardsLayout)
 
         if full:
@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
             self.add_card(self.dealerCardsLayout, self.game.dealer_hand[1])
             self.dealerTotalLabel.setText("Total: ?")
 
-    def new_round_setup(self):
+    def new_round_setup(self): #clear cards, gives initials cards hands
         self.clear_layout(self.playerCardsLayout)
         self.clear_layout(self.dealerCardsLayout)
 
@@ -229,7 +229,7 @@ class MainWindow(QMainWindow):
         self.hitButton.setEnabled(True)
         self.standButton.setEnabled(True)
 
-    def end_round(self):
+    def end_round(self): #ends the current round and updates the score display
         self.hitButton.setEnabled(False)
         self.standButton.setEnabled(False)
 
