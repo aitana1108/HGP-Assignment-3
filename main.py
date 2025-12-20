@@ -42,11 +42,22 @@ class MainWindow(QMainWindow):
         self.newRoundButton = QPushButton("New Round")
         self.themeButton = QPushButton("Toggle Theme")
 
+        title = QLabel("Blackjack")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title.setFont(QFont("Arial", 24, QFont.Weight.Bold))
+        title.setObjectName("title")
+        title.setStyleSheet("margin-top: 8px; margin-bottom: 16px;")
+        left_layout.addWidget(title)
+
         for btn in (self.hitButton, self.standButton, self.newRoundButton):
-            btn.setMinimumHeight(40)
             left_layout.addWidget(btn)
 
         left_layout.addStretch()
+
+        for btn in (self.hitButton, self.standButton, self.newRoundButton, self.themeButton):
+            btn.setMinimumHeight(40)
+
+        self.themeButton.setObjectName("themeButton")
         left_layout.addWidget(self.themeButton)
 
         #connects the buttons with the actions
@@ -80,12 +91,6 @@ class MainWindow(QMainWindow):
 
         game_layout = QVBoxLayout()
         table_outer_layout.addLayout(game_layout, 4)
-
-        # title = QLabel("Blackjack")
-        # title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # title.setFont(QFont("Arial", 30, QFont.Weight.Bold))
-        # title.setStyleSheet("color: #000;")
-        # game_layout.addWidget(title)
 
         dealer_label = QLabel("Dealer")
         dealer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -153,6 +158,8 @@ class MainWindow(QMainWindow):
         score_layout.addWidget(score_title)
         score_layout.addWidget(self.statsLabel)
         score_layout.addStretch()
+
+        self.apply_dark_theme() if self.dark_mode else self.apply_light_theme()
 
         self.new_round_setup()
 
@@ -298,14 +305,18 @@ class MainWindow(QMainWindow):
 
     def apply_light_theme(self):
         self.setStyleSheet("""
-            QMainWindow { background-color: #f0f0f0; }
-            QPushButton { background-color: #ddd; }
+            QMainWindow { background-color: #e1e1e1; }
+            QPushButton { background-color: #d3d3d3; color: black; border: 1px solid #3d3d3d; border-radius: 5px; }
+            QPushButton#themeButton { color: #fff; background-color: #000; font-size: 16px; }
+            QLabel#title { color: #000; }
         """)
 
     def apply_dark_theme(self):
         self.setStyleSheet("""
             QMainWindow { background-color: #1e1e1e; }
-            QPushButton { background-color: #333; color: white; }
+            QPushButton { background-color: #3d3d3d; color: white; }
+            QPushButton#themeButton { color: #000; background-color: #fff; font-size: 16px; }
+            QLabel#title { color: #fff; }
         """)
 
     def toggle_theme(self):
