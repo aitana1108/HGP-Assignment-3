@@ -223,14 +223,20 @@ class MainWindow(QMainWindow):
 
     def on_new_round(self): #starts a new round
         # show restart-game confirmation dialog
-        reply = QMessageBox.question(
-            self,
-            "Start New Round?",
-            "Are you sure you want to start a new round?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Start New Round?")
+        msg.setText("Are you sure you want to start a new round?")
+        msg.setIcon(QMessageBox.Icon.Question)
+        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
-        if reply == QMessageBox.StandardButton.No:
+        # style each button in pop-up menu
+        for btn in msg.buttons():
+            btn.setMinimumHeight(36)
+            btn.setMinimumWidth(90)
+            btn.setStyleSheet("padding: 6px 14px; font-size: 14px;")
+
+        reply = msg.exec()
+        if msg.standardButton(msg.clickedButton()) != QMessageBox.StandardButton.Yes:
             return
 
         self.game.new_round()
@@ -308,21 +314,51 @@ class MainWindow(QMainWindow):
     def apply_light_theme(self):
         self.setStyleSheet("""
             QMainWindow { background-color: #e1e1e1; }
-            QPushButton { background-color: #d3d3d3; color: black; border: 1px solid #3d3d3d; border-radius: 5px; }
+            QPushButton {
+                background-color: #d3d3d3;
+                color: black;
+                border: 1px solid #3d3d3d;
+                border-radius: 5px;
+            }
+            QPushButton:disabled {
+                background-color: #bdbdbd;
+                color: #6b6b6b;
+                border: 1px solid #8a8a8a;
+            }
             QPushButton#themeButton { color: #fff; background-color: #000; font-size: 16px; }
             QLabel#title { color: #000; }
             QLabel#scoreTitle { color: #000; }
-            QLabel#statsLabel { color: #000; border-color: #000; background-color: #d3d3d3; color: #000; }
+            QLabel#statsLabel { 
+                color: #000; 
+                border-color: #000; 
+                background-color: #d3d3d3; 
+                color: #000; 
+            }
         """)
 
     def apply_dark_theme(self):
         self.setStyleSheet("""
             QMainWindow { background-color: #1e1e1e; }
-            QPushButton { background-color: #3d3d3d; color: white; }
+            QPushButton {
+                background-color: #3d3d3d;
+                color: white;
+                border: 1px solid #6a6a6a;
+                border-radius: 5px;
+            }
+            QPushButton:disabled {
+                background-color: #2a2a2a;
+                color: #7a7a7a;
+                border: 1px solid #444444;
+            }
             QPushButton#themeButton { color: #000; background-color: #fff; font-size: 16px; }
             QLabel#title { color: #fff; }
             QLabel#scoreTitle { color: #fff; }
-            QLabel#statsLabel { color: #fff; }
+            QLabel#statsLabel { 
+                color: #fff; 
+                border-color: #fff; 
+                background-color: #3d3d3d; 
+                color: #fff; 
+            }
         """)
 
     def toggle_theme(self):
