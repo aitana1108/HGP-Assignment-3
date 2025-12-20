@@ -36,18 +36,40 @@ class MainWindow(QMainWindow):
 
         left_layout = QVBoxLayout()
 
-        #left panel buttons
-        self.hitButton = QPushButton("Hit")
-        self.standButton = QPushButton("Stand")
-        self.newRoundButton = QPushButton("New Round")
-        self.themeButton = QPushButton("Toggle Theme")
-
+        # title
         title = QLabel("Blackjack")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setFont(QFont("Arial", 24, QFont.Weight.Bold))
         title.setObjectName("title")
         title.setStyleSheet("margin-top: 8px; margin-bottom: 16px;")
         left_layout.addWidget(title)
+
+        # Score box
+        score_title = QLabel("Score")
+        score_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        score_title.setFont(QFont("Arial", 14, QFont.Weight.Bold))
+        score_title.setObjectName("scoreTitle")
+
+        self.statsLabel = QLabel("Wins: 0\nLosses: 0\nPushes: 0")
+        self.statsLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.statsLabel.setFont(QFont("Arial", 12))
+        self.statsLabel.setObjectName("statsLabel")
+        self.statsLabel.setStyleSheet("""
+            QLabel {
+                border: 2px solid;
+                padding: 10px;
+                margin-bottom: 48px;
+            }
+        """)
+
+        left_layout.addWidget(score_title)
+        left_layout.addWidget(self.statsLabel)
+
+        #left panel buttons
+        self.hitButton = QPushButton("Hit")
+        self.standButton = QPushButton("Stand")
+        self.newRoundButton = QPushButton("New Round")
+        self.themeButton = QPushButton("Toggle Theme")
 
         for btn in (self.hitButton, self.standButton, self.newRoundButton):
             left_layout.addWidget(btn)
@@ -104,6 +126,8 @@ class MainWindow(QMainWindow):
                                             "padding: 8px;")
 
         self.dealerCardsLayout = QHBoxLayout() #dealer section Ui
+        self.dealerCardsLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.dealerCardsLayout.setSpacing(10)
 
         game_layout.addWidget(dealer_label)
         game_layout.addWidget(self.dealerTotalLabel)
@@ -122,6 +146,8 @@ class MainWindow(QMainWindow):
                                             "padding: 8px;")
 
         self.playerCardsLayout = QHBoxLayout() #player section ui
+        self.playerCardsLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.playerCardsLayout.setSpacing(10)
 
         game_layout.addWidget(player_label)
         game_layout.addWidget(self.playerTotalLabel)
@@ -134,30 +160,6 @@ class MainWindow(QMainWindow):
 
 
         game_layout.addStretch()
-
-        score_layout = QVBoxLayout()
-        table_outer_layout.addLayout(score_layout, 1)
-
-        score_title = QLabel("Score")
-        score_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        score_title.setFont(QFont("Arial", 14, QFont.Weight.Bold))
-        score_title.setStyleSheet("color: gold;")
-
-        self.statsLabel = QLabel("Wins: 0\nLosses: 0\nPushes: 0") #scoreboard section
-        self.statsLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.statsLabel.setFont(QFont("Arial", 12))
-        self.statsLabel.setStyleSheet("""
-            QLabel {
-                border: 2px solid gold;
-                padding: 10px;
-                background-color: #0b6b1a;
-                color: white;
-            }
-        """)
-
-        score_layout.addWidget(score_title)
-        score_layout.addWidget(self.statsLabel)
-        score_layout.addStretch()
 
         self.apply_dark_theme() if self.dark_mode else self.apply_light_theme()
 
@@ -309,6 +311,8 @@ class MainWindow(QMainWindow):
             QPushButton { background-color: #d3d3d3; color: black; border: 1px solid #3d3d3d; border-radius: 5px; }
             QPushButton#themeButton { color: #fff; background-color: #000; font-size: 16px; }
             QLabel#title { color: #000; }
+            QLabel#scoreTitle { color: #000; }
+            QLabel#statsLabel { color: #000; border-color: #000; background-color: #d3d3d3; color: #000; }
         """)
 
     def apply_dark_theme(self):
@@ -317,6 +321,8 @@ class MainWindow(QMainWindow):
             QPushButton { background-color: #3d3d3d; color: white; }
             QPushButton#themeButton { color: #000; background-color: #fff; font-size: 16px; }
             QLabel#title { color: #fff; }
+            QLabel#scoreTitle { color: #fff; }
+            QLabel#statsLabel { color: #fff; }
         """)
 
     def toggle_theme(self):
