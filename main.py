@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QPushButton, QMessageBox
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QPixmap, QIcon
+from PyQt6.QtGui import QFont, QPixmap, QIcon, QShortcut, QKeySequence
 import sys
 
 from game_logic import Game21
@@ -311,6 +311,39 @@ class MainWindow(QMainWindow):
     def toggle_theme(self):
         self.dark_mode = not self.dark_mode
         self.apply_dark_theme() if self.dark_mode else self.apply_light_theme()
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        modifiers = event.modifiers()
+
+        # Ctrl+W OR Cmd+W to exit application
+        if key == Qt.Key.Key_W and (
+                modifiers & Qt.KeyboardModifier.ControlModifier
+                or modifiers & Qt.KeyboardModifier.MetaModifier
+        ):
+            self.close()
+            return
+
+        # Ignore auto-repeat so holding a key doesn't spam actions
+        if event.isAutoRepeat():
+            return
+
+        # H to Hit
+        if key == Qt.Key.Key_H and self.hitButton.isEnabled():
+            self.on_hit()
+            return
+
+        # S to Stand
+        if key == Qt.Key.Key_S and self.standButton.isEnabled():
+            self.on_stand()
+            return
+
+        # N to start New Round
+        if key == Qt.Key.Key_N:
+            self.on_new_round()
+            return
+
+        super().keyPressEvent(event)
 
 
 if __name__ == '__main__':
