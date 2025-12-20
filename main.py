@@ -158,6 +158,9 @@ class MainWindow(QMainWindow):
 
 
     def on_hit(self): #handles the hit button and its action
+        if not self.hitButton.isEnabled():
+            return
+
         card = self.game.player_hit()
         self.add_card(self.playerCardsLayout, card)
         #gives card to player
@@ -181,6 +184,10 @@ class MainWindow(QMainWindow):
             self.end_round()
 
     def on_stand(self): #handles the stand button and its action
+        # Disable buttons immediately to prevent double-click / repeated dealer turns
+        self.standButton.setEnabled(False)
+        self.hitButton.setEnabled(False)
+
         self.game.reveal_dealer_card()
         self.game.play_dealer_turn()
           #reveals the dealer cards , player turns and decides the winner
@@ -189,6 +196,7 @@ class MainWindow(QMainWindow):
         self.dealerTotalLabel.setText(f"Total: {self.game.dealer_total()}")
 
         result = self.game.decide_winner()
+
         if "Player wins" in result:
             self.feedbackLabel.setStyleSheet("color: #2ECC71;"
                                              "padding: 10px;")
@@ -206,9 +214,15 @@ class MainWindow(QMainWindow):
 
     def on_new_round(self): #starts a new round
         # show restart-game confirmation dialog
-        QMessageBox.information(self, "Confirmation Dialog",
-                                "New Round is about to begin."
-                                )
+        reply = QMessageBox.question(
+            self,
+            "Start New Round?",
+            "Are you sure you want to start a new round?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.No:
+            return
 
         self.game.new_round()
         self.new_round_setup()
