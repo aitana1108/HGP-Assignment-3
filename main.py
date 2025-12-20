@@ -1,10 +1,12 @@
+import os
+
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QLabel,
     QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton
+    QPushButton, QMessageBox
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QPixmap
+from PyQt6.QtGui import QFont, QPixmap, QIcon
 import sys
 
 from game_logic import Game21
@@ -15,7 +17,11 @@ class MainWindow(QMainWindow):
     def __init__(self): #initalizes the main and ui layout
         super().__init__()
         self.setWindowTitle("Game of 21")
-        self.setGeometry(200, 200, 900, 500)
+        self.setGeometry(200, 200, 900, 505)
+        # set window icon
+        iconPath = os.path.join(os.path.dirname(__file__), "assets", "window-icon.png")
+        if os.path.exists(iconPath):
+            self.setWindowIcon(QIcon(iconPath))
 
         self.game = Game21()
         self.dark_mode = False
@@ -52,7 +58,21 @@ class MainWindow(QMainWindow):
         root_layout.addLayout(left_layout, 1)
 
         table_widget = QWidget()
-        table_widget.setStyleSheet("background-color: #0b6b1a;")
+        # setting a name for a table widget,
+        # so that the styles to it do not repeat to other objects in the widget
+        table_widget.setObjectName("tableWidget")
+
+        table_widget.setStyleSheet("""
+            QWidget#tableWidget {
+                background: qradialgradient(
+                    cx: 0.5, cy: 0.5,
+                    radius: 1,
+                    fx: 0.5, fy: 0.5,
+                    stop: 0 #227b52,
+                    stop: .5 #055e35
+                );
+            }
+        """)
         root_layout.addWidget(table_widget, 5)
 
         table_outer_layout = QHBoxLayout()
@@ -61,20 +81,22 @@ class MainWindow(QMainWindow):
         game_layout = QVBoxLayout()
         table_outer_layout.addLayout(game_layout, 4)
 
-        title = QLabel("Blackjack")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title.setFont(QFont("Arial", 28, QFont.Weight.Bold))
-        title.setStyleSheet("color: #1e40ff;")
-        game_layout.addWidget(title)
+        # title = QLabel("Blackjack")
+        # title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # title.setFont(QFont("Arial", 30, QFont.Weight.Bold))
+        # title.setStyleSheet("color: #000;")
+        # game_layout.addWidget(title)
 
         dealer_label = QLabel("Dealer")
         dealer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        dealer_label.setFont(QFont("Arial", 16, QFont.Weight.Bold))
+        dealer_label.setFont(QFont("Arial", 22, QFont.Weight.Bold))
         dealer_label.setStyleSheet("color: gold;")
 
         self.dealerTotalLabel = QLabel("")
         self.dealerTotalLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.dealerTotalLabel.setStyleSheet("color: white;")
+        self.dealerTotalLabel.setFont(QFont("Arial", 14))
+        self.dealerTotalLabel.setStyleSheet("color: #9EF7CE;"
+                                            "padding: 8px;")
 
         self.dealerCardsLayout = QHBoxLayout() #dealer section Ui
 
@@ -82,26 +104,29 @@ class MainWindow(QMainWindow):
         game_layout.addWidget(self.dealerTotalLabel)
         game_layout.addLayout(self.dealerCardsLayout)
 
-        self.feedbackLabel = QLabel("")
-        self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.feedbackLabel.setFont(QFont("Arial", 14, QFont.Weight.Bold))
-        self.feedbackLabel.setStyleSheet("color: yellow;")
-        game_layout.addWidget(self.feedbackLabel)
-
         player_label = QLabel("Player")
         player_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        player_label.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        player_label.setStyleSheet("color: gold;")
+        player_label.setFont(QFont("Arial", 22, QFont.Weight.Bold))
+        player_label.setStyleSheet("color: gold;"
+                                   "padding-top: 8px")
 
         self.playerTotalLabel = QLabel("Total: 0")
         self.playerTotalLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.playerTotalLabel.setStyleSheet("color: white;")
+        self.playerTotalLabel.setFont(QFont("Arial", 14))
+        self.playerTotalLabel.setStyleSheet("color: #9EF7CE;"
+                                            "padding: 8px;")
 
         self.playerCardsLayout = QHBoxLayout() #player section ui
 
         game_layout.addWidget(player_label)
         game_layout.addWidget(self.playerTotalLabel)
         game_layout.addLayout(self.playerCardsLayout)
+
+        self.feedbackLabel = QLabel("")
+        self.feedbackLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.feedbackLabel.setFont(QFont("Arial", 24, QFont.Weight.Bold))
+        game_layout.addWidget(self.feedbackLabel)
+
 
         game_layout.addStretch()
 
@@ -142,6 +167,7 @@ class MainWindow(QMainWindow):
 
         if total == 21:
             self.update_dealer_cards(full=True)
+            self.feedbackLabel.setStyleSheet("color: #2ECC71")
             self.feedbackLabel.setText("Blackjack! Player wins (21).")
             self.game.player_wins += 1
             self.end_round()
@@ -149,6 +175,7 @@ class MainWindow(QMainWindow):
 
         if total > 21:
             self.update_dealer_cards(full=True)
+            self.feedbackLabel.setStyleSheet("color: #E74C3C")
             self.feedbackLabel.setText("Bust! Dealer wins.")
             self.game.dealer_wins += 1
             self.end_round()
@@ -162,11 +189,27 @@ class MainWindow(QMainWindow):
         self.dealerTotalLabel.setText(f"Total: {self.game.dealer_total()}")
 
         result = self.game.decide_winner()
+        if "Player wins" in result:
+            self.feedbackLabel.setStyleSheet("color: #2ECC71;"
+                                             "padding: 10px;")
+        elif "Dealer wins" in result:
+            self.feedbackLabel.setStyleSheet("color: #E74C3C;"
+                                             "padding: 10px;")
+        else:  # Draw / Push
+            self.feedbackLabel.setStyleSheet("color: #F4D03F;"
+                                             "padding: 10px;")
+
         self.feedbackLabel.setText(result)
+
 
         self.end_round()
 
     def on_new_round(self): #starts a new round
+        # show restart-game confirmation dialog
+        QMessageBox.information(self, "Confirmation Dialog",
+                                "New Round is about to begin."
+                                )
+
         self.game.new_round()
         self.new_round_setup()
 
